@@ -1,0 +1,7 @@
+{
+  "name": "CardPulse - Smart Business Card Scanner",
+  "description": "A vibrant, AI-powered business card scanner that extracts contact details with precision and stores them in an organized digital Rolodex.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
