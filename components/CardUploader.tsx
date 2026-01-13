@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from 'react';
+import { ensurePuterLoaded } from "../services/geminiService";
 import { ScanStatus } from '../types';
 
 interface CardUploaderProps {
@@ -13,6 +14,13 @@ export const CardUploader: React.FC<CardUploaderProps> = ({ onCapture, status, e
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const ensurePuterSignedIn = async () => {
+    const puter = await ensurePuterLoaded();
+    // Optional but recommended: sign-in on user gesture to avoid popup blockers
+    if (puter?.auth?.isSignedIn && !puter.auth.isSignedIn()) {
+      await puter.auth.signIn({ attempt_temp_user_creation: true });
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,7 +77,16 @@ export const CardUploader: React.FC<CardUploaderProps> = ({ onCapture, status, e
           
           <div className="flex flex-col sm:flex-row gap-4">
             <button
-              onClick={() => fileInputRef.current?.click()}
+             onClick={async () => {
+              try {
+                await ensurePuterSignedIn();
+                fileInputRef.current?.click();
+              } catch (e) {
+                console.error(e);
+                alert("Please allow popups to sign in to Puter, then try again.");
+              }
+            }}
+            
               disabled={status === ScanStatus.SCANNING || isCameraActive}
               className="flex-1 bg-white border-2 border-indigo-600 text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
             >
